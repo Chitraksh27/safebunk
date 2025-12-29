@@ -178,7 +178,7 @@ This project is created for educational purposes as part of placement training.
 
 ## Author
 
-Developed during Placement Training
+[Chitraksh Sharma](https://linkedin.com/in/chitraksh-sharma)
 
 ---
 
