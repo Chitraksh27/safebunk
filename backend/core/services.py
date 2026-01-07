@@ -96,7 +96,7 @@ def import_attendance_data(user, raw_csv_text):
             stats['failed'] += 1
             continue
 
-        # --- 3. LOGIC (SafeBunk 3-2-1 Rule + Validation) ---
+        # --- 3. LOGIC (SafeSkip 3-2-1 Rule + Validation) ---
         # Get raw duration from CSV if it exists
         duration_input = row.get('Duration') or row.get('duration')
         

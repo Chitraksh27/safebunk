@@ -36,7 +36,7 @@ export default function Register() {
         <div className="bg-indigo-600 p-8 text-center">
           <div className="w-12 h-12 bg-white rounded-xl mx-auto flex items-center justify-center text-indigo-600 font-bold text-xl mb-4">S</div>
           <h2 className="text-2xl font-bold text-white">Create Account</h2>
-          <p className="text-indigo-100 mt-2 text-sm">Join SafeBunk to track your attendance</p>
+          <p className="text-indigo-100 mt-2 text-sm">Join SafeSkip to track your attendance</p>
         </div>
 
         {/* Form */}

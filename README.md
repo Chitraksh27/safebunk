@@ -1,4 +1,4 @@
-# SafeBunk
+# SafeSkip
 
 A smart attendance tracking and forecasting application that helps students monitor their attendance across subjects and plan their leaves strategically to maintain required attendance percentages.
 
@@ -32,7 +32,7 @@ A smart attendance tracking and forecasting application that helps students moni
 ## Project Structure
 
 ```
-safebunk/
+safeskip/
 ├── backend/                # Django backend
 │   ├── backend/           # Project settings
 │   ├── core/              # Main application
