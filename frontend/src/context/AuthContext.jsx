@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  // 1. Session Validation on Load
+  // 1. Check Session on Load
   useEffect(() => {
     const validateSession = async () => {
       const token = localStorage.getItem('access_token');
@@ -18,62 +18,70 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return;
       }
-
       try {
         await api.get('attendance/dashboard/');
       } catch (error) {
-        console.log("Session expired or invalid. Logging out.");
+        console.log("Session invalid. Logging out.");
         logout();
       } finally {
         setLoading(false);
       }
     };
-
     validateSession();
   }, []);
 
-  // 2. THE FIX: Login Function performing API Call
+  // 2. LOGIN (Already Fixed)
   const login = async (username, password) => {
     try {
-      // A. Call the API
       const response = await api.post('attendance/login/', { username, password });
-      
       const { user: userData, tokens } = response.data;
 
-      // B. Save to Storage
       localStorage.setItem('access_token', tokens.access);
       localStorage.setItem('refresh_token', tokens.refresh);
       localStorage.setItem('user', JSON.stringify(userData));
       
-      // C. Update State
       setUser(userData);
-
-      // D. Return Success (So Login.jsx knows to redirect)
       return { success: true };
-
     } catch (error) {
-      console.error("Login Failed:", error);
-      
-      // Extract error message safely
       const errorMsg = error.response?.data?.detail 
                     || error.response?.data?.message 
-                    || "Login failed. Check your credentials.";
-
+                    || "Login failed.";
       return { success: false, error: errorMsg };
     }
   };
 
+  // 3. REGISTER (👉 NEW ADDITION TO FIX YOUR ERROR)
+  const register = async (username, email, password) => {
+    try {
+      await api.post('attendance/register/', { username, email, password });
+      return { success: true };
+    } catch (error) {
+      console.error("Registration Error:", error);
+      
+      // Extract specific validation errors (e.g., "Username taken")
+      let errorMsg = "Registration failed.";
+      if (error.response?.data) {
+          if (error.response.data.username) errorMsg = error.response.data.username[0];
+          else if (error.response.data.detail) errorMsg = error.response.data.detail;
+          else if (error.response.data.message) errorMsg = error.response.data.message;
+      }
+      
+      return { success: false, error: errorMsg };
+    }
+  };
+
+  // 4. LOGOUT
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     setUser(null);
-    // Optional: Redirect to login if not handled by ProtectedRoute
-    // window.location.href = '/login'; 
+    window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    // 👉 ADD register TO THE VALUE OBJECT
+    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
