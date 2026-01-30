@@ -1,44 +1,21 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.parsers import MultiPartParser, FormParser # <--- 1. IMPORT THIS
-from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
-import traceback
-
 from .models import Subject, AttendanceLog, SessionType
 from .services import import_attendance_data
+import traceback
 
-# 1. REGISTER API
-class RegisterView(APIView):
+class DashboardView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        email = request.data.get('email')
-
-        if not username or not password:
-            return Response({"error": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if User.objects.filter(username=username).exists():
-            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.create_user(username=username, email=email, password=password)
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# 2. DASHBOARD API
-class DashboardView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
-        user = request.user
+        user = User.objects.first()
+        if not user:
+            return Response({"error": "No users found. Run 'python manage.py createsuperuser'"}, status=400)
+
         subjects = Subject.objects.filter(user=user)
-        
         subject_data = []
         global_attended = 0
         global_conducted = 0
@@ -47,19 +24,16 @@ class DashboardView(APIView):
             sessions = SessionType.objects.filter(subject=sub)
             logs = AttendanceLog.objects.filter(session_type__in=sessions)
             total = logs.count()
-            present = logs.filter(status__in=['Present', 'PRESENT', 'P', 'Present']).count()
+            present = logs.filter(status__in=['Present', 'PRESENT', 'P']).count()
             
             pct = (present / total * 100) if total > 0 else 0
-            
             global_attended += present
             global_conducted += total
-            
-            main_type = sessions.first().name if sessions.exists() else "Class"
             
             subject_data.append({
                 "id": sub.id,
                 "name": sub.name,
-                "type": main_type,
+                "type": sessions.first().name if sessions.exists() else "Class",
                 "attended": present,
                 "conducted": total,
                 "percentage": round(pct, 1)
@@ -76,37 +50,28 @@ class DashboardView(APIView):
             "subjects": subject_data
         })
 
-
-# 3. IMPORT API (The Fix is Here!)
 class ImportAttendanceView(APIView):
-    permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser) # <--- 2. ENABLE FILE PARSING
+    permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
-        # Check if file exists
+        user = User.objects.first()
+        if not user:
+             return Response({"error": "No users found. Run createsuperuser."}, status=400)
+
         if 'file' not in request.FILES:
-            return Response({"error": "No file uploaded. Key 'file' missing."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        file_obj = request.FILES['file']
+            return Response({"error": "No file uploaded."}, status=400)
         
         try:
-            # Decode the file bytes to string
-            csv_text = file_obj.read().decode('utf-8')
-            
-            summary = import_attendance_data(request.user, csv_text)
-            return Response({"message": "Import Successful", "summary": summary}, status=status.HTTP_200_OK)
-        
-        except UnicodeDecodeError:
-            return Response({"error": "Invalid file encoding. Please upload a standard CSV file."}, status=status.HTTP_400_BAD_REQUEST)
+            csv_text = request.FILES['file'].read().decode('utf-8')
+            summary = import_attendance_data(user, csv_text)
+            return Response({"message": "Import Successful", "summary": summary}, status=200)
         except Exception as e:
             trace = traceback.format_exc()
             print("❌ IMPORT CRASHED:\n" + trace)
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=500)
 
-
-# 4. FORECAST API
 class ForecastView(APIView):
-    permission_classes = [IsAuthenticated]
-
+    permission_classes = [AllowAny]
     def post(self, request):
-        return Response({"status": "Forecast logic pending", "results": []}, status=status.HTTP_200_OK)
+        return Response({"status": "Forecast pending"}, status=200)

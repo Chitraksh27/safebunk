@@ -1,17 +1,14 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell } from 'recharts';
-import { LogOut, RefreshCw, Settings, Calendar as CalendarIcon } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext';
+import { RefreshCw, Settings, Calendar as CalendarIcon } from 'lucide-react'; 
 import ImportModal from '../components/ImportModal';
 import ForecastPlanner from '../components/ForecastPlanner';
 import api from '../services/api';
 
-// --- SAFER DONUT COMPONENT (Unchanged) ---
 const DonutRing = ({ percentage, color, size = 80 }) => {
   const validPct = percentage || 0; 
   const safePct = Math.min(Math.max(validPct, 0), 100);
   const data = [{ value: safePct }, { value: 100 - safePct }];
-
   return (
     <div className="relative flex items-center justify-center">
       <div className="absolute font-bold text-slate-700" style={{ fontSize: size / 4 }}>
@@ -28,12 +25,9 @@ const DonutRing = ({ percentage, color, size = 80 }) => {
 };
 
 export default function Dashboard() {
-  const { logout } = useContext(AuthContext);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({ global: { attended: 0, conducted: 0, percentage: 100 }, subjects: [] });
   const [threshold, setThreshold] = useState(75);
-  
-  // 🔑 NEW: Key to force ForecastPlanner to reload after import
   const [plannerKey, setPlannerKey] = useState(0); 
 
   const fetchDashboardData = async () => {
@@ -45,13 +39,11 @@ export default function Dashboard() {
 
   useEffect(() => { fetchDashboardData(); }, []);
 
-  // 🔑 NEW: Handler to update everything after Import
   const handleImportSuccess = () => {
-      fetchDashboardData();        // 1. Update stats (Donuts)
-      setPlannerKey(prev => prev + 1); // 2. Force ForecastPlanner to re-fetch Schedule
+      fetchDashboardData();
+      setPlannerKey(prev => prev + 1);
   };
 
-  // --- LOGIC (Unchanged) ---
   const getAdvice = (attended, conducted) => {
     if (conducted === 0) return { status: 'SAFE', hours: 0 };
     const currentPct = (attended / conducted);
@@ -76,12 +68,10 @@ export default function Dashboard() {
         <div className="flex items-center gap-2"><div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">S</div><span className="text-xl font-bold text-indigo-900">SafeSkip</span></div>
         <div className="flex items-center gap-4">
           <button onClick={() => setIsImportOpen(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-full hover:bg-indigo-100"><RefreshCw size={16} /> Import Data</button>
-          <button onClick={logout} className="text-slate-400 hover:text-red-500"><LogOut size={20} /></button>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Global Card */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-2 text-center md:text-left">
               <h2 className="text-2xl font-bold text-slate-900">Global Attendance</h2>
@@ -96,7 +86,6 @@ export default function Dashboard() {
             </div>
         </section>
 
-        {/* Subjects Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {dashboardData.subjects.map((sub) => {
               const advice = getAdvice(sub.attended, sub.conducted);
@@ -117,16 +106,9 @@ export default function Dashboard() {
             })}
         </section>
 
-        {/* Forecast Section */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-3 mb-6"><div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><CalendarIcon size={20} /></div><h3 className="text-lg font-bold text-slate-800">Attendance Forecast</h3></div>
-          
-          {/* 🔑 THIS IS THE KEY FIX: The 'key' prop forces reload */}
-          <ForecastPlanner 
-             key={plannerKey} 
-             currentGlobalPct={dashboardData.global.percentage} 
-             subjects={dashboardData.subjects} 
-          />
+          <ForecastPlanner key={plannerKey} currentGlobalPct={dashboardData.global.percentage} subjects={dashboardData.subjects} />
         </section>
       </main>
 
