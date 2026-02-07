@@ -1,12 +1,13 @@
 from django.urls import path
-from .views import (
-    DashboardView, 
-    ImportAttendanceView, 
-    ForecastView
-)
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import UploadAttendanceView, RegisterView  # Make sure RegisterView is imported!
 
 urlpatterns = [
-    path('dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('import/', ImportAttendanceView.as_view(), name='import_attendance'),
-    path('forecast/', ForecastView.as_view(), name='forecast'),
+    # --- Authentication Routes ---
+    path('auth/register/', RegisterView.as_view(), name='auth_register'), # 👈 This was missing
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # --- Data Routes ---
+    path('attendance/import/', UploadAttendanceView.as_view(), name='upload_csv'),
 ]

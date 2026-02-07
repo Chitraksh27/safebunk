@@ -8,7 +8,6 @@ export default function Register() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     
-    // 👉 Now this works because we added 'register' to AuthContext
     const { register } = useContext(AuthContext); 
     const navigate = useNavigate();
 
@@ -17,7 +16,6 @@ export default function Register() {
         setIsLoading(true);
         setError('');
 
-        // Call the context function
         const result = await register(
             formData.username, 
             formData.email, 
@@ -42,45 +40,42 @@ export default function Register() {
                 </div>
 
                 <div className="p-8">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && (
-                            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 text-center">
-                                {error}
-                            </div>
-                        )}
+                    {error && <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-3 rounded text-red-700 text-sm font-medium">{error}</div>}
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Username</label>
-                            <div className="relative">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Username</label>
+                            <div className="relative mt-1">
                                 <User className="absolute left-3 top-3 text-slate-400" size={18} />
                                 <input 
                                     type="text" 
                                     required 
                                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 outline-none"
-                                    placeholder="Choose a username"
+                                    placeholder="e.g. johndoe123" 
                                     value={formData.username}
                                     onChange={(e) => setFormData({...formData, username: e.target.value})}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Email</label>
-                            <div className="relative">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Email</label>
+                            <div className="relative mt-1">
                                 <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
                                 <input 
                                     type="email" 
+                                    required 
                                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 outline-none"
-                                    placeholder="your@email.com"
+                                    placeholder="john@example.com"
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Password</label>
-                            <div className="relative">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
+                            <div className="relative mt-1">
                                 <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
                                 <input 
                                     type="password" 

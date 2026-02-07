@@ -1,8 +1,7 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Lock, User, ArrowRight, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -10,7 +9,8 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { login } = useContext(AuthContext);
+    // 👇 UPDATED: Use 'loginUser' to match AuthContext
+    const { loginUser } = useContext(AuthContext); 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -18,12 +18,12 @@ export default function Login() {
         setIsLoading(true);
         setError('');
 
-        const result = await login(username, password);
+        const result = await loginUser(username, password);
 
         if (result.success) {
-            navigate('/dashboard'); // Redirect to Dashboard on success
+            navigate('/dashboard'); 
         } else {
-            setError(result.error);
+            setError(result.error || "Login failed");
             setIsLoading(false);
         }
     };
@@ -31,50 +31,48 @@ export default function Login() {
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-
-                {/* Header */}
                 <div className="bg-indigo-600 p-8 text-center">
-                    <div className="w-12 h-12 bg-white rounded-xl mx-auto flex items-center justify-center text-indigo-600 font-bold text-xl mb-4">S</div>
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                        <User className="text-white" size={24} />
+                    </div>
                     <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
                     <p className="text-indigo-100 mt-2 text-sm">Sign in to manage your attendance</p>
                 </div>
 
-                {/* Form */}
                 <div className="p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-3 rounded text-red-700 text-sm font-medium">
+                            {error}
+                        </div>
+                    )}
 
-                        {error && (
-                            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 text-center">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Username</label>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Username</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 text-slate-400" size={18} />
-                                <input
-                                    type="text"
+                                <input 
+                                    type="text" 
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 outline-none"
                                     placeholder="Enter your username"
-                                    required
+                                    required 
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Password</label>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
-                                <input
-                                    type="password"
+                                <input 
+                                    type="password" 
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-600 outline-none"
                                     placeholder="••••••••"
-                                    required
+                                    required 
                                 />
                             </div>
                         </div>

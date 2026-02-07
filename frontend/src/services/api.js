@@ -1,27 +1,21 @@
+// src/services/api.js
 import axios from 'axios';
 
-// const API_URL = "http://127.0.0.1:8000/api/"; 
-const API_URL = "https://safeskip-backend.onrender.com/api/"; 
-
 const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: 'http://127.0.0.1:8000/api/',
 });
 
-
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
-
-
+// ⚡ THIS IS THE MISSING PART CAUSING 403 ERRORS
+api.interceptors.request.use(config => {
+    const tokens = localStorage.getItem('authTokens');
+    if (tokens) {
+        const parsed = JSON.parse(tokens);
+        // Attach the token to the header
+        config.headers.Authorization = `Bearer ${parsed.access}`;
+    }
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
 
 export default api;

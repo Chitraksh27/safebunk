@@ -8,15 +8,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'password', 'email')
         
-    def validate_username(self, value):
-        if User.objects.filter(username = value).exists():
-            raise serializers.ValidationError("This username is already taken.")
-        return value
-    
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username = validated_data['username'],
-            password = validated_data['password'],
-            email = validated_data.get('email', '')
-        )
+        user = User.objects.create_user(username = validated_data['username'], email = validated_data.get('email', ''), password = validated_data['password'])
         return user
