@@ -36,13 +36,8 @@ MIDDLEWARE = [
 ]
 
 # Allow Frontend access
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://safeskip.vercel.app"
-]
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False 
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -88,8 +83,8 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), 
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    
+    'ACCESS_TOKEN_LIFETIME': timedelta(days = 1), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    
 }
 
 LANGUAGE_CODE = 'en-us'
